@@ -73,7 +73,7 @@ client.once('ready', () => {
   console.log(`Logged in as ${client.user?.tag}`);
 
   // Poll every 60 seconds (60000 ms)
-  setInterval(pollPanels, 60000);
+  setInterval(pollPanels, 300000);
   // Optionally, run the poll immediately on startup.
   pollPanels();
 });
