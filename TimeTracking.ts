@@ -40,17 +40,7 @@ export class TimeTracking {
           patch.getRegion().getName() +
           (patch.getName() == null || patch.getName() === ''
             ? ''
-            : ' (' + patch.getName() + ')');
-
-        const implementation =
-          PatchImplementation['_$wrappers'][patch.getImplementation()];
-
-
-          if(implementation.getName() != null && implementation.getName() !== '')
-          {
-            panel.title += ' - ' + implementation.getName();
-          }
-        
+            : ' (' + patch.getName() + ')');        
 
         const prediction = farmingTracker.predictPatch(patch, this.getConfiguration.bind(this));
         if (prediction == null) {

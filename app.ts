@@ -1,8 +1,12 @@
 import { Client, GatewayIntentBits, TextChannel } from 'discord.js';
+import express, { Request, Response } from 'express';
 import { TimeTracking } from './TimeTracking';
 
 const TREETRACKER_CHANNEL_ID = process.env.TREETRACKER_CHANNEL_ID;
 const TREETRACKER_BOT_TOKEN = process.env.TREETRACKER_BOT_TOKEN;
+
+// Global variable to store the latest panelEntries
+let latestPanelEntries: any[] = [];
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
@@ -23,6 +27,8 @@ const pollPanels = async () => {
       tabEntry.panels.filter((panel: any) => panel.notify === "true")
     );
 
+    // Update global variable so the GET endpoint can return it.
+    latestPanelEntries = panelEntries;
 
     if (!TREETRACKER_CHANNEL_ID) {
       throw new Error('TREETRACKER_CHANNEL_ID is not defined in the environment variables');
@@ -72,14 +78,26 @@ const pollPanels = async () => {
 client.once('ready', () => {
   console.log(`Logged in as ${client.user?.tag}`);
 
-  // Poll every 60 seconds (60000 ms)
+  // Poll every 5 minutes (300000 ms)
   setInterval(pollPanels, 300000);
   // Optionally, run the poll immediately on startup.
   pollPanels();
 });
 
-
 if (!TREETRACKER_BOT_TOKEN) {
   throw new Error('TREETRACKER_BOT_TOKEN is not defined in the environment variables');
 }
 client.login(TREETRACKER_BOT_TOKEN);
+
+// --- Express HTTP Server ---
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Added explicit type annotations for req and res
+app.get('/timetracking', (req: Request, res: Response) => {
+  res.json(latestPanelEntries);
+});
+
+app.listen(PORT, () => {
+  console.log(`HTTP server running on port ${PORT}`);
+});
